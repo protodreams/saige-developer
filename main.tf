@@ -12,7 +12,8 @@ locals {
   ami = "ami-0f93c02efd1974b8b"
   instance_type = "r7gd.2xlarge"
   keyname = "saige-developer"
-  private_subnet = "subnet-0fb2dbd310c5099f8"
+  # private_subnet = "subnet-0b97bb7233ed32c99"
+  private_subnet =  "subnet-0fb2dbd310c5099f8"
   # security_group = "sg-0b5701b4e00fc3b59"
 }
 data "aws_security_group" "saige_vpc_sg" {
@@ -72,15 +73,15 @@ resource "aws_volume_attachment" "developer-prod" {
   count = var.environment == "prod" ? 1:0
 }
 
-resource "aws_volume_attachment" "developer-spot" {
-  device_name = "/dev/sdf"
-  volume_id   = data.aws_ebs_volume.Caves_of_Steel.id
-  instance_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
+# resource "aws_volume_attachment" "developer-spot" {
+#   device_name = "/dev/sdf"
+#   volume_id   = data.aws_ebs_volume.Caves_of_Steel.id
+#   instance_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
 
-  depends_on = [
-    aws_spot_instance_request.developer-spot
-  ]
-}
+#   depends_on = [
+#     aws_spot_instance_request.developer-spot
+#   ]
+# }
 
 resource "aws_launch_template" "developer-template" {
   name = "developer-template"
@@ -112,13 +113,13 @@ resource "aws_instance" "developer-instance" {
 }
 
 resource "aws_spot_instance_request" "developer-spot" {
-  spot_price = "0.24"
+  spot_price = "0.40"
   ami = local.ami
   instance_type = local.instance_type
   key_name = local.keyname
+  security_groups = [data.aws_security_group.saige_vpc_sg.id]
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
   subnet_id = "subnet-0fb2dbd310c5099f8"
-  security_groups = [data.aws_security_group.saige_vpc_sg.name]
   count = var.environment == "prod" ? 0:1
   wait_for_fulfillment = true
 }
