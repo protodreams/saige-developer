@@ -10,14 +10,17 @@ variable "environment" {
 locals {
   name   = "saige-developer"
   ami = "ami-0f93c02efd1974b8b"
-  instance_type = "r7gd.2xlarge"
+  instance_type = "r6gd.xlarge"
   keyname = "saige-developer"
   # private_subnet = "subnet-0b97bb7233ed32c99"
-  private_subnet =  "subnet-0fb2dbd310c5099f8"
+  private_subnet =  "subnet-0cd792fce9046e292"
   # security_group = "sg-0b5701b4e00fc3b59"
 }
 data "aws_security_group" "saige_vpc_sg" {
-  name        = "saige-vpc-sg"
+  filter {
+    name = "group-name"
+    values = ["saige-vpc-sg"]
+  }
 }
 
 data "aws_subnets" "saige_vpc_subnet" {
@@ -43,12 +46,24 @@ resource "aws_iam_role" "saige_ssm_role" {
     ]
   })
 }
-resource "aws_network_interface" "developer-network-interface" { 
-  subnet_id = data.aws_subnets.saige_vpc_subnet.ids[0]
-  security_groups = [data.aws_security_group.saige_vpc_sg.name]
+
+resource "aws_iam_role_policy_attachment" "ssm_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.saige_ssm_role.name
 }
 
-  
+resource "aws_network_interface" "developer-network-interface" { 
+  subnet_id = local.private_subnet
+  security_groups = [data.aws_security_group.saige_vpc_sg.id]
+}
+
+output "aws_network_interface"  {
+  value = data.aws_subnets.saige_vpc_subnet.ids[1]
+}
+
+output "aws_security_group" {
+    value = data.aws_security_group.saige_vpc_sg.id
+}
   resource "aws_iam_instance_profile" "ssm_instance_profile" {
     name = "ssm-instance-profile"
     role = aws_iam_role.saige_ssm_role.name
@@ -73,22 +88,22 @@ resource "aws_volume_attachment" "developer-prod" {
   count = var.environment == "prod" ? 1:0
 }
 
-# resource "aws_volume_attachment" "developer-spot" {
-#   device_name = "/dev/sdf"
-#   volume_id   = data.aws_ebs_volume.Caves_of_Steel.id
-#   instance_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
-
-#   depends_on = [
-#     aws_spot_instance_request.developer-spot
-#   ]
-# }
+resource "aws_volume_attachment" "developer-spot" {
+  device_name = "/dev/sdf"
+  volume_id   = data.aws_ebs_volume.Caves_of_Steel.id
+  instance_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
+ count = var.environment == "prod" ? 0:1
+  depends_on = [
+    aws_spot_instance_request.developer-spot
+  ]
+}
 
 resource "aws_launch_template" "developer-template" {
   name = "developer-template"
   image_id = local.ami
   instance_type = local.instance_type
   key_name = local.keyname
-  # user_data = base64encode(templatefile("${path.module}/init_script.tpl", {}))
+  user_data = base64encode(templatefile("${path.module}/init_script.tpl", {}))
   iam_instance_profile {
     name = aws_iam_instance_profile.ssm_instance_profile.name
   }
@@ -96,10 +111,6 @@ resource "aws_launch_template" "developer-template" {
     device_index = 0
     network_interface_id = aws_network_interface.developer-network-interface.id    
   } 
-
-    tags = {
-    Name = "Developer"
-  }
 }
 
 resource "aws_instance" "developer-instance" {
@@ -110,6 +121,10 @@ resource "aws_instance" "developer-instance" {
     id = aws_launch_template.developer-template.id
     version = "$Latest"
   }
+
+   tags = {
+      Name = "Developer"
+  }
 }
 
 resource "aws_spot_instance_request" "developer-spot" {
@@ -119,14 +134,17 @@ resource "aws_spot_instance_request" "developer-spot" {
   key_name = local.keyname
   security_groups = [data.aws_security_group.saige_vpc_sg.id]
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
-  subnet_id = "subnet-0fb2dbd310c5099f8"
+  subnet_id = local.private_subnet
   count = var.environment == "prod" ? 0:1
   wait_for_fulfillment = true
-}
+  user_data = base64encode(templatefile("${path.module}/init_script.tpl", {}))
+} 
+
 
 resource "aws_ec2_tag" "developer-spot-tag" {
-  resource_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
-  key = "Name"
-  value = "Waldo and Magic, Inc"
+    resource_id = aws_spot_instance_request.developer-spot[0].spot_instance_id
+    count = var.environment == "prod" ? 0:1
+    key = "Name"
+   value = "Waldo and Magic, Inc"
 }
 
