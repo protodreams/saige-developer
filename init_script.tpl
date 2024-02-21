@@ -1,5 +1,4 @@
 #!/bin/bash
-sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 sudo systemctl enable amazon-ssm-agent
 sudo systemctl start amazon-ssm-agent
     
@@ -33,24 +32,38 @@ chown ec2-user:ec2-user /mnt/caves_of_steel
               
 sudo -u ec2-user  bash <<'EOF'
 # install zsh
-sudo yum install -y zsh util-linux-user
+sudo yum install -y zsh 
+sudo yum install -y util-linux-user
 sudo chsh -s /usr/bin/zsh ec2-user
 
 sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 
 echo -e "\nalias ll='ls -la'" >> ~/.zshrc
- zsh ~/.zshrc
+
+echo -e "\nHF_DATASETS_CACHE=/mnt/caves_of_steel/.cache/huggingface"
+echo -e "\nTRANSFORMERS_CACHE=/mnt/caves_of_steel/.cache/torch"
+
+source ~/.zshrc
+
+zsh ~/.zshrc
+
+wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.11.0-2-Linux-aarch64.sh -O ~/miniconda.sh
+
+chmod +x ~/miniconda.sh
+sudo bash ~/miniconda.sh -b -p /opt/conda
 
 /opt/conda/bin/conda init zsh
-/opt/conda/bin/mamba init zsh
+
+# sudo curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+# sudo bash Miniforge3-$(uname)-$(uname -m).sh -y
+
+# /opt/conda/bin/mamba init zsh
+
+echo -e "\nPATH=/opt/conda/bin:$PATH" >> ~/.zshrc
 
 conda update -n base -c defaults conda -y
 mamba update -n base -c defaults mamba -y
 
-echo -e "\nTRANSFORMERS_CACHE=/mnt/caves_of_steel/.cache/torch/transformers" >> ~/.zshrc
-echo -e "\nTRANSFORMERS_CACHE" >> ~/.zshrc
-
-source ~/.zshrc
 EOF
 
 # echo "mamba create -n models -y pytorch torchvision torchaudio cudatoolkit=11.8 transformers -c pytorch -c huggingface" > /mnt/caves_of_steel/load_olma.sh
