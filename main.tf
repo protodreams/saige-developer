@@ -9,12 +9,10 @@ variable "environment" {
 }
 locals {
   name   = "saige-developer"
-  ami = "ami-0f93c02efd1974b8b"
-  instance_type = "r6gd.xlarge"
-  keyname = "saige-developer"
-  # private_subnet = "subnet-0b97bb7233ed32c99"
-  private_subnet =  "subnet-0cd792fce9046e292"
-  # security_group = "sg-0b5701b4e00fc3b59"
+  ami = var.model_ami
+  instance_type = var.model_type
+  subnet = var.private_subnet_A
+  keyname = "saige-dev"
 }
 data "aws_security_group" "saige_vpc_sg" {
   filter {
@@ -53,7 +51,7 @@ resource "aws_iam_role_policy_attachment" "ssm_policy" {
 }
 
 resource "aws_network_interface" "developer-network-interface" { 
-  subnet_id = local.private_subnet
+  subnet_id = local.subnet
   security_groups = [data.aws_security_group.saige_vpc_sg.id]
 }
 
@@ -134,7 +132,7 @@ resource "aws_spot_instance_request" "developer-spot" {
   key_name = local.keyname
   security_groups = [data.aws_security_group.saige_vpc_sg.id]
   iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile.name
-  subnet_id = local.private_subnet
+  subnet_id = local.subnet
   count = var.environment == "prod" ? 0:1
   wait_for_fulfillment = true
   user_data = base64encode(templatefile("${path.module}/init_script.tpl", {}))

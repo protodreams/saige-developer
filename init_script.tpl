@@ -9,17 +9,19 @@ yum install git -y
 # # Wait for the volume to be attached
 while [ ! -e /dev/nvme2n1 ]; do sleep 1; done
 
-block_size=$(blockdev --getsize64 /dev/nvme2n1 | awk '{print $1/1024/1024/1024 " GB"}')
+block_size_1=$(blockdev --getsize64 /dev/nvme1n1 | awk '{print $1/1024/1024/1024}')
+block_size_2=$(blockdev --getsize64 /dev/nvme2n1 | awk '{print $1/1024/1024/1024}')
 export block_size
-export caves_vol=/dev/nvme2n1
+export caves_vol
 
- # check this against mount volume size
-# if [ "$block_size" = "100G" ]; then
-#     caves_vol=/dev/nvme2n1
-# fi
-# else
-#   caves_vol=/dev/nvme1n1
-# fi
+# check this against mount volume size
+if [ "$block_size_1" = "100" ]; then
+    caves_vol=/dev/nvme1n1
+fi
+if [ "$block_size_2" = "100" ]; then
+    caves_vol=/dev/nvme2n1
+fi
+
 
 # Create a file system on the volume if it does not have one
 file -s $caves_vol | grep -q ext4 || mkfs -t ext4 $caves_vol
