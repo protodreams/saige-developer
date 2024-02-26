@@ -146,3 +146,20 @@ resource "aws_ec2_tag" "developer-spot-tag" {
    value = "Waldo and Magic, Inc"
 }
 
+
+# install a bastion host
+resource "aws_instance" "bastion-host" {
+  ami = var.bastion_ami
+  instance_type = var.bastion_type
+  subnet_id = var.public_subnet_A
+  security_groups = [data.aws_security_group.saige_vpc_sg.id]
+  key_name = "saige-dev"
+  associate_public_ip_address = true
+   tags = {
+      Name = "Bastion Host"
+  }
+}
+
+output "bastion-host" {
+  value = aws_instance.bastion-host.public_ip
+}
