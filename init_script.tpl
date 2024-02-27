@@ -62,10 +62,12 @@ zsh ~/.zshrc
 
 # # /opt/conda/bin/mamba init zsh
 
-echo -e "\nPATH=/mnt/caves_of_steel/opt/miniforge3/condabin:$PATH" >> ~/.zshrc
+echo -e "\nPATH=/mnt/caves_of_steel/opt/miniforge3/condabin:/mnt/caves_of_steel/opt/miniforge3/bin:$PATH" >> ~/.zshrc
 
-conda init zsh
-mamba init zsh
+# conda init zsh
+# mamba init zsh
+
+# python -m ipykernel install --user --name crow --display-name "jup crow"
 
 EOF
 
