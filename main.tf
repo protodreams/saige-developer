@@ -155,11 +155,12 @@ resource "aws_instance" "bastion-host" {
   security_groups = [data.aws_security_group.saige_vpc_sg.id]
   key_name = "saige-dev"
   associate_public_ip_address = true
+  count = var.environment == "bastion" ? 1:0
    tags = {
       Name = "Bastion Host"
   }
 }
 
-output "bastion-host" {
-  value = aws_instance.bastion-host.public_ip
-}
+# output "bastion-host" {
+#   value = aws_instance.bastion-host[0].public_ip
+# }

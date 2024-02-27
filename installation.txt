@@ -1,0 +1,10 @@
+mamba install pytorch torchvision torchaudio cudatoolkit=<CUDA_VERSION> -c pytorch -c conda-forge
+
+mamba search cudatoolkit --channel conda-forge
+
+mamba repoquery search cuda-version --channel conda-forge
+
+mamba repoquery depends cudatoolkit=12.2 --channel conda-forge
+
+
+python -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121

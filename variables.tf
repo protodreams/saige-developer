@@ -26,13 +26,13 @@
  variable "private_subnet_A" {
      description = "The subnet for development on private subnet zone A"
      type = string
-     default = "subnet-09f8261abbd0ad2f4"
+     default = "subnet-018ca37d59f7542d6"
  }
 
   variable "public_subnet_A" {
-     description = "The subnet for development on private subnet zone A"
+     description = "The subnet for development on public subnet zone A"
      type = string
-     default = "subnet-09f8261abbd0ad2f4"
+     default = "subnet-018ca37d59f7542d6"
  }
 
  variable "bastion_ami" {
