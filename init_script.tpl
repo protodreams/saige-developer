@@ -43,32 +43,12 @@ sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/to
 
 echo -e "\nalias ll='ls -la'" >> ~/.zshrc
 
-echo -e "\nHF_DATASETS_CACHE=/mnt/caves_of_steel/.cache/huggingface"
-echo -e "\nTRANSFORMERS_CACHE=/mnt/caves_of_steel/.cache/torch"
+echo -e "\nexport HF_DATASETS_CACHE=/mnt/caves_of_steel/.cache/huggingface"
+echo -e "\nexport HF_HOME=/mnt/caves_of_steel/.cache/torch"
 
 source ~/.zshrc
 
 zsh ~/.zshrc
-
-# wget https://repo.anaconda.com/miniconda/Miniconda3-py39_23.11.0-2-Linux-aarch64.sh -O ~/miniconda.sh
-
-# chmod +x ~/miniconda.sh
-# sudo bash ~/miniconda.sh -b -p /opt/conda
-
-# /opt/conda/bin/conda init zsh
-
-# # sudo curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
-# # sudo bash Miniforge3-$(uname)-$(uname -m).sh -y
-
-# # /opt/conda/bin/mamba init zsh
-
-echo -e "\nPATH=/mnt/caves_of_steel/opt/miniforge3/condabin:/mnt/caves_of_steel/opt/miniforge3/bin:$PATH" >> ~/.zshrc
-
-# conda init zsh
-# mamba init zsh
-
-# python -m ipykernel install --user --name crow --display-name "jup crow"
-
 EOF
 
 # echo "mamba create -n models -y pytorch torchvision torchaudio cudatoolkit=11.8 transformers -c pytorch -c huggingface" > /mnt/caves_of_steel/load_olma.sh
