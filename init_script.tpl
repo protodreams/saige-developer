@@ -43,8 +43,10 @@ sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/to
 
 echo -e "\nalias ll='ls -la'" >> ~/.zshrc
 
-echo -e "\nexport HF_DATASETS_CACHE=/mnt/caves_of_steel/.cache/huggingface"
-echo -e "\nexport HF_HOME=/mnt/caves_of_steel/.cache/torch"
+echo -e "\nexport HF_DATASETS_CACHE=/mnt/caves_of_steel/.cache/huggingface">> ~/.zshrc
+echo -e "\nexport HF_HOME=/mnt/caves_of_steel/.cache/torch" >> ~/.zshrc
+
+echo -e "\nexport PATH=/mnt/caves_of_steel/opt/miniforge3/bin:$PATH" >> ~/.zshrc 
 
 source ~/.zshrc
 
